@@ -1,31 +1,21 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"log"
 	"main/handler"
+	"main/repo"
+	"main/service"
 	"net/http"
-	"main/utils"
-	"github.com/gorilla/mux"
-	"go.mongodb.org/mongo-driver/bson"
 
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
-
-func initDatabase() {
-	client, cancel := utils.GetConn()
-	defer cancel()
-
-	databases, _ := client.ListDatabaseNames(context.TODO(), bson.M{})
-	fmt.Println(databases)
-}
-
 
 func startServer(handler *handler.UserHandler) {
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/users", handler.CreateUser).Methods("GET")
+	router.HandleFunc("/users", handler.CreateUser).Methods("POST")
+	router.HandleFunc("/users/{username}", handler.GetOne).Methods("GET")
 
 	println("Server starting")
 	log.Fatal(http.ListenAndServe(":3000", router))
@@ -38,8 +28,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	initDatabase()
-	userHandler := &handler.UserHandler{}
+	userRepository := &repo.UserRepository{}
+	userService := &service.UserService{Repo: userRepository}
+	userHandler := &handler.UserHandler{Service: userService}
 
 	startServer(userHandler)
 }
