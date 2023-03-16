@@ -2,6 +2,9 @@ package main
 
 import (
 	"log"
+	"main/auth/generator"
+	authHandler "main/auth/handler"
+	authService "main/auth/service"
 	"main/handler"
 	"main/repo"
 	"main/service"
@@ -11,16 +14,15 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func startServer(handler *handler.UserHandler) {
+func startServer(userHandler *handler.UserHandler, authHandler *authHandler.AuthHandler) {
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/users", handler.CreateUser).Methods("POST")
-	router.HandleFunc("/users/{username}", handler.GetOne).Methods("GET")
-
+	router.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
+	router.HandleFunc("/users/{username}", authHandler.Authorize(userHandler.GetOne, "Admin")).Methods("GET")
+	router.HandleFunc("/login", authHandler.Login).Methods("POST")
 	println("Server starting")
 	log.Fatal(http.ListenAndServe(":3000", router))
 }
-
 
 func main() {
 	err := godotenv.Load()
@@ -29,8 +31,11 @@ func main() {
 	}
 
 	userRepository := &repo.UserRepository{}
+	jwtGenerator := &generator.JwtGenerator{}
 	userService := &service.UserService{Repo: userRepository}
+	authService := &authService.AuthService{Repo: userRepository, JwtGenerator: jwtGenerator}
 	userHandler := &handler.UserHandler{Service: userService}
+	authHandler := &authHandler.AuthHandler{AuthService: authService}
 
-	startServer(userHandler)
+	startServer(userHandler, authHandler)
 }

@@ -13,7 +13,6 @@ type UserHandler struct {
 	Service *service.UserService
 }
 
-
 func (handler *UserHandler) CreateUser(writer http.ResponseWriter, req *http.Request) {
 	var user model.User
 	err := json.NewDecoder(req.Body).Decode(&user)
