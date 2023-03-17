@@ -1,6 +1,9 @@
 package main
 
 import (
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 	"log"
 	"main/auth/generator"
 	authHandler "main/auth/handler"
@@ -9,19 +12,21 @@ import (
 	"main/repo"
 	"main/service"
 	"net/http"
-
-	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 )
 
 func startServer(userHandler *handler.UserHandler, authHandler *authHandler.AuthHandler) {
 	router := mux.NewRouter().StrictSlash(true)
 
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:4200"},
+		AllowCredentials: true,
+	})
 	router.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
 	router.HandleFunc("/users/{username}", authHandler.Authorize(userHandler.GetOne, "Admin")).Methods("GET")
 	router.HandleFunc("/login", authHandler.Login).Methods("POST")
+	r := c.Handler(router)
 	println("Server starting")
-	log.Fatal(http.ListenAndServe(":3000", router))
+	log.Fatal(http.ListenAndServe(":3000", r))
 }
 
 func main() {
