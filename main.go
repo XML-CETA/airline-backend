@@ -33,9 +33,8 @@ func startServer(userHandler *handler.UserHandler, authHandler *authHandler.Auth
 	router.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
 	router.HandleFunc("/users/{username}", authHandler.Authorize(userHandler.GetOne, "Admin")).Methods("GET")
 	router.HandleFunc("/login", authHandler.Login).Methods("POST")
-	r := c.Handler(router)
 	println("Server starting")
-	log.Fatal(http.ListenAndServe(":3000", r))
+	log.Fatal(http.ListenAndServe(":3000", c.Handler(router)))
 }
 
 func main() {
