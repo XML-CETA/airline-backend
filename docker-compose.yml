@@ -1,0 +1,18 @@
+version: "3.7"
+services:
+    servers:
+      build:
+          context: ./
+          dockerfile: Dockerfile
+      image: airline
+      container_name: airline_backend
+      restart: always
+      networks:
+        - servers
+      ports:
+        - 3000:3000
+
+networks:
+  servers:
+    name: servers
+    driver: bridge
