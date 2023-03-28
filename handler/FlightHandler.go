@@ -7,6 +7,7 @@ import (
 	"main/service"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -35,8 +36,7 @@ func (handler *FlightHandler) CreateFlight(writer http.ResponseWriter, req *http
 }
 
 func (handler *FlightHandler) GetOne(writer http.ResponseWriter, req *http.Request) {
-	var id string
-	err := json.NewDecoder(req.Body).Decode(&id)
+	id := mux.Vars(req)["id"]
 	idO, _ := primitive.ObjectIDFromHex(id)
 	flight, err := handler.Service.GetOne(idO)
 
@@ -72,9 +72,8 @@ func (handler *FlightHandler) UpdateFlight(writer http.ResponseWriter, req *http
 }
 
 func (handler *FlightHandler) DeleteFlight(writer http.ResponseWriter, req *http.Request) {
-	var id string
-	err := json.NewDecoder(req.Body).Decode(&id)
-	idO, _ := primitive.ObjectIDFromHex(id)
+	id := mux.Vars(req)["id"]
+	idO, err := primitive.ObjectIDFromHex(id)
 
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)

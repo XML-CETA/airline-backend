@@ -36,11 +36,10 @@ func startServer(userHandler *handler.UserHandler, authHandler *authHandler.Auth
 	router.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
 	router.HandleFunc("/users/{username}", authHandler.Authorize(userHandler.GetOne, "Admin")).Methods("GET")
 	router.HandleFunc("/login", authHandler.Login).Methods("POST")
-	//Flights CRUD
 	router.HandleFunc("/flights", flightHandler.CreateFlight).Methods("POST")
-	router.HandleFunc("/flights", flightHandler.GetOne).Methods("GET")
+	router.HandleFunc("/flights/{id}", flightHandler.GetOne).Methods("GET")
 	router.HandleFunc("/flights", flightHandler.UpdateFlight).Methods("PUT")
-	router.HandleFunc("/flights", flightHandler.DeleteFlight).Methods("DELETE")
+	router.HandleFunc("/flights/{id}", flightHandler.DeleteFlight).Methods("DELETE")
 
 	println("Server starting")
 	log.Fatal(http.ListenAndServe(":3000", c.Handler(router)))
