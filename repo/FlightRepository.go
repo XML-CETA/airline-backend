@@ -84,10 +84,9 @@ func (repo *FlightRepository) GetAll() ([]dtos.FlightDto, error) {
 	for dataResult.Next(context.TODO()) {
 		var flight model.Flight
 		err := dataResult.Decode(&flight)
-		if err != nil {
-			// handle error
+		if err == nil {
+			flights = append(flights, flight)
 		}
-		flights = append(flights, flight)
 	}
 
 	var result []dtos.FlightDto
@@ -108,10 +107,9 @@ func (repo *FlightRepository) GetAllUpcoming() ([]dtos.FlightDto, error) {
 	for dataResult.Next(context.TODO()) {
 		var flight model.Flight
 		err := dataResult.Decode(&flight)
-		if err != nil {
-			// handle error
+		if err == nil {
+			flights = append(flights, flight)
 		}
-		flights = append(flights, flight)
 	}
 
 	var result []dtos.FlightDto
