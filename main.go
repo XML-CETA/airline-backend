@@ -37,6 +37,8 @@ func startServer(userHandler *handler.UserHandler, authHandler *authHandler.Auth
 	router.HandleFunc("/users/{username}", authHandler.Authorize(userHandler.GetOne, "Admin")).Methods("GET")
 	router.HandleFunc("/login", authHandler.Login).Methods("POST")
 	router.HandleFunc("/flights", flightHandler.CreateFlight).Methods("POST")
+	router.HandleFunc("/flights", flightHandler.GetAll).Methods("GET")
+	router.HandleFunc("/flights/upcoming", flightHandler.GetAllUpcoming).Methods("GET")
 	router.HandleFunc("/flights/{id}", flightHandler.GetOne).Methods("GET")
 	router.HandleFunc("/flights", flightHandler.UpdateFlight).Methods("PUT")
 	router.HandleFunc("/flights/{id}", flightHandler.DeleteFlight).Methods("DELETE")

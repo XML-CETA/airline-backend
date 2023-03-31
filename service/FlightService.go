@@ -28,3 +28,11 @@ func (service *FlightService) Delete(id primitive.ObjectID) error {
 func (service *FlightService) Update(flight *dtos.FlightDto) error {
 	return service.Repo.Update(flight)
 }
+
+func (service *FlightService) GetAll() ([]dtos.FlightDto, error) {
+	return service.Repo.GetAll()
+}
+
+func (service *FlightService) GetAllUpcoming() ([]dtos.FlightDto, error) {
+	return service.Repo.GetAllUpcoming()
+}
