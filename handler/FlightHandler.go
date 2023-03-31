@@ -90,3 +90,33 @@ func (handler *FlightHandler) DeleteFlight(writer http.ResponseWriter, req *http
 	writer.WriteHeader(http.StatusCreated)
 	writer.Header().Set("Content-Type", "application/json")
 }
+
+func (handler *FlightHandler) GetAll(writer http.ResponseWriter, req *http.Request) {
+	var flights []dtos.FlightDto
+	flights, err := handler.Service.GetAll()
+
+	if err != nil {
+		writer.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(writer).Encode(flights)
+}
+
+func (handler *FlightHandler) GetAllUpcoming(writer http.ResponseWriter, req *http.Request) {
+	var flights []dtos.FlightDto
+	flights, err := handler.Service.GetAllUpcoming()
+
+	if err != nil {
+		writer.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(writer).Encode(flights)
+}

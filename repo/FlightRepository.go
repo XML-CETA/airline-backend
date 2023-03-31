@@ -5,6 +5,7 @@ import (
 	"main/dtos"
 	"main/model"
 	"main/utils"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -70,4 +71,70 @@ func (repo *FlightRepository) Update(flightAlter *dtos.FlightDto) error {
 	_, err := coll.UpdateOne(context.TODO(), filter, update)
 
 	return err
+}
+
+func (repo *FlightRepository) GetAll() ([]dtos.FlightDto, error) {
+	client, cancel := utils.GetConn()
+	defer cancel()
+
+	coll := client.Database("airline").Collection("flights")
+
+	var flights []model.Flight
+	dataResult, err := coll.Find(context.TODO(), bson.M{})
+	for dataResult.Next(context.TODO()) {
+		var flight model.Flight
+		err := dataResult.Decode(&flight)
+		if err != nil {
+			// handle error
+		}
+		flights = append(flights, flight)
+	}
+
+	var result []dtos.FlightDto
+	result = ConvertToFlightDto(flights)
+
+	return result, err
+}
+
+func (repo *FlightRepository) GetAllUpcoming() ([]dtos.FlightDto, error) {
+	client, cancel := utils.GetConn()
+	defer cancel()
+
+	coll := client.Database("airline").Collection("flights")
+	filter := bson.M{"flighdateandtime": bson.M{"$gt": time.Now()}}
+
+	var flights []model.Flight
+	dataResult, err := coll.Find(context.TODO(), filter)
+	for dataResult.Next(context.TODO()) {
+		var flight model.Flight
+		err := dataResult.Decode(&flight)
+		if err != nil {
+			// handle error
+		}
+		flights = append(flights, flight)
+	}
+
+	var result []dtos.FlightDto
+	result = ConvertToFlightDto(flights)
+
+	return result, err
+}
+
+func ConvertToFlightDto(data []model.Flight) []dtos.FlightDto {
+	var result []dtos.FlightDto
+
+	for _, flight := range data {
+		var dtoFlight dtos.FlightDto
+		dtoFlight.Id = flight.Id.Hex()
+		dtoFlight.FlighDateAndTime = flight.FlighDateAndTime
+		dtoFlight.StartingPoint = flight.StartingPoint
+		dtoFlight.Destination = flight.Destination
+		dtoFlight.Price = flight.Price
+		dtoFlight.Seats = flight.Seats
+		dtoFlight.RemainingSeats = flight.RemainingSeats
+
+		result = append(result, dtoFlight)
+	}
+
+	return result
 }
