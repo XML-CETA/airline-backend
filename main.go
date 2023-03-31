@@ -1,18 +1,20 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
-	"github.com/rs/cors"
 	"log"
 	"main/handler"
 	"main/repo"
 	"main/service"
 	"net/http"
+
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 )
 
 func startServer(userHandler *handler.UserHandler, authHandler *handler.AuthHandler,
-	flightHandler *handler.FlightHandler) {
+	flightHandler *handler.FlightHandler, ticketHandler *handler.TicketHandler) {
+
 	router := mux.NewRouter().StrictSlash(true)
 
 	cors := cors.New(cors.Options{
@@ -56,6 +58,8 @@ func main() {
 	flightRepository := &repo.FlightRepository{}
 	flightService := &service.FlightService{Repo: flightRepository}
 	flightHandler := &handler.FlightHandler{Service: flightService}
-
-	startServer(userHandler, authHandler, flightHandler)
+	ticketRepository := &repo.TicketRepository{}
+	ticketService := &service.TicketService{Repo: ticketRepository}
+	ticketHandler := &handler.TicketHandler{Service: ticketService}
+	startServer(userHandler, authHandler, flightHandler, ticketHandler)
 }
