@@ -39,6 +39,10 @@ func startServer(userHandler *handler.UserHandler, authHandler *handler.AuthHand
 	router.HandleFunc("/flights/{id}", flightHandler.GetOne).Methods("GET")
 	router.HandleFunc("/flights", flightHandler.UpdateFlight).Methods("PUT")
 	router.HandleFunc("/flights/{id}", flightHandler.DeleteFlight).Methods("DELETE")
+	router.HandleFunc("/tickets", ticketHandler.CreateTicket).Methods("POST")
+	router.HandleFunc("/tickets/{id}", ticketHandler.GetOne).Methods("GET")
+	router.HandleFunc("/tickets", ticketHandler.GetAll).Methods("GET")
+	// router.HandleFunc("/tickets", authHandler.GetUsername(ticketHandler.GetAll)).Methods("GET")
 
 	println("Server starting")
 	log.Fatal(http.ListenAndServe(":3000", cors.Handler(router)))
@@ -59,7 +63,7 @@ func main() {
 	flightService := &service.FlightService{Repo: flightRepository}
 	flightHandler := &handler.FlightHandler{Service: flightService}
 	ticketRepository := &repo.TicketRepository{}
-	ticketService := &service.TicketService{Repo: ticketRepository}
-	ticketHandler := &handler.TicketHandler{Service: ticketService}
+	ticketService := &service.TicketService{Repo: ticketRepository, FlightRepo: flightRepository, UserRepo: userRepository}
+	ticketHandler := &handler.TicketHandler{Service: ticketService, Auth: authHandler}
 	startServer(userHandler, authHandler, flightHandler, ticketHandler)
 }
