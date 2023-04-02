@@ -100,12 +100,15 @@ func (handler *FlightHandler) DeleteFlight(writer http.ResponseWriter, req *http
 
 func (handler *FlightHandler) GetAll(writer http.ResponseWriter, req *http.Request) {
 	var flights []dtos.FlightDto
-	flights, err := handler.Service.GetAll()
+	var result []model.Flight
+	result, err := handler.Service.GetAll()
 
 	if err != nil {
 		writer.WriteHeader(http.StatusNotFound)
 		return
 	}
+
+	flights = ConvertToFlightDto(result)
 
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
@@ -115,15 +118,37 @@ func (handler *FlightHandler) GetAll(writer http.ResponseWriter, req *http.Reque
 
 func (handler *FlightHandler) GetAllUpcoming(writer http.ResponseWriter, req *http.Request) {
 	var flights []dtos.FlightDto
-	flights, err := handler.Service.GetAllUpcoming()
+	var result []model.Flight
+	result, err := handler.Service.GetAllUpcoming()
 
 	if err != nil {
 		writer.WriteHeader(http.StatusNotFound)
 		return
 	}
 
+	flights = ConvertToFlightDto(result)
+
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusOK)
 
 	json.NewEncoder(writer).Encode(flights)
+}
+
+func ConvertToFlightDto(data []model.Flight) []dtos.FlightDto {
+	var result []dtos.FlightDto
+
+	for _, flight := range data {
+		var dtoFlight dtos.FlightDto
+		dtoFlight.Id = flight.Id.Hex()
+		dtoFlight.FlighDateAndTime = flight.FlighDateAndTime
+		dtoFlight.StartingPoint = flight.StartingPoint
+		dtoFlight.Destination = flight.Destination
+		dtoFlight.Price = flight.Price
+		dtoFlight.Seats = flight.Seats
+		dtoFlight.RemainingSeats = flight.RemainingSeats
+
+		result = append(result, dtoFlight)
+	}
+
+	return result
 }
