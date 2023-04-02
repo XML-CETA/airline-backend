@@ -98,6 +98,29 @@ func (handler *FlightHandler) DeleteFlight(writer http.ResponseWriter, req *http
 	writer.Header().Set("Content-Type", "application/json")
 }
 
+func (handler *FlightHandler) SearchFlights(writer http.ResponseWriter, req *http.Request) {
+	var searchDto dtos.SearchDto
+	err := json.NewDecoder(req.Body).Decode(&searchDto)
+
+	var flights []dtos.SearchedFlightDto
+	flights, err = handler.Service.SearchFlights(searchDto)
+
+	if err != nil {
+		writer.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	if len(flights) == 0 {
+		http.Error(writer, "There are no available flights at that time", http.StatusBadRequest)
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(writer).Encode(flights)
+}
+
 func (handler *FlightHandler) GetAll(writer http.ResponseWriter, req *http.Request) {
 	var flights []dtos.FlightDto
 	flights, err := handler.Service.GetAll()

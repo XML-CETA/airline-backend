@@ -23,6 +23,10 @@ func (service *FlightService) GetOne(id primitive.ObjectID) (model.Flight, error
 	return service.Repo.GetOne(id)
 }
 
+func (service *FlightService) SearchFlights(searchDto dtos.SearchDto) ([]dtos.SearchedFlightDto, error) {
+	return service.Repo.SearchFlights(searchDto)
+}
+
 func (service *FlightService) Delete(id primitive.ObjectID) error {
 	return service.Repo.Delete(id)
 }
