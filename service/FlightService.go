@@ -3,7 +3,6 @@ package service
 import (
 	//"errors"
 
-	"main/dtos"
 	"main/model"
 	"main/repo"
 
@@ -31,10 +30,10 @@ func (service *FlightService) Update(flight *model.Flight) error {
 	return service.Repo.Update(flight)
 }
 
-func (service *FlightService) GetAll() ([]dtos.FlightDto, error) {
+func (service *FlightService) GetAll() ([]model.Flight, error) {
 	return service.Repo.GetAll()
 }
 
-func (service *FlightService) GetAllUpcoming() ([]dtos.FlightDto, error) {
+func (service *FlightService) GetAllUpcoming() ([]model.Flight, error) {
 	return service.Repo.GetAllUpcoming()
 }

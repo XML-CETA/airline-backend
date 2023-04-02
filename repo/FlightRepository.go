@@ -3,7 +3,6 @@ package repo
 import (
 	"context"
 
-	"main/dtos"
 	"main/model"
 	"main/utils"
 	"time"
@@ -67,7 +66,7 @@ func (repo *FlightRepository) Update(flight *model.Flight) error {
 	return err
 }
 
-func (repo *FlightRepository) GetAll() ([]dtos.FlightDto, error) {
+func (repo *FlightRepository) GetAll() ([]model.Flight, error) {
 	client, cancel := utils.GetConn()
 	defer cancel()
 
@@ -83,13 +82,10 @@ func (repo *FlightRepository) GetAll() ([]dtos.FlightDto, error) {
 		}
 	}
 
-	var result []dtos.FlightDto
-	result = ConvertToFlightDto(flights)
-
-	return result, err
+	return flights, err
 }
 
-func (repo *FlightRepository) GetAllUpcoming() ([]dtos.FlightDto, error) {
+func (repo *FlightRepository) GetAllUpcoming() ([]model.Flight, error) {
 	client, cancel := utils.GetConn()
 	defer cancel()
 
@@ -106,27 +102,5 @@ func (repo *FlightRepository) GetAllUpcoming() ([]dtos.FlightDto, error) {
 		}
 	}
 
-	var result []dtos.FlightDto
-	result = ConvertToFlightDto(flights)
-
-	return result, err
-}
-
-func ConvertToFlightDto(data []model.Flight) []dtos.FlightDto {
-	var result []dtos.FlightDto
-
-	for _, flight := range data {
-		var dtoFlight dtos.FlightDto
-		dtoFlight.Id = flight.Id.Hex()
-		dtoFlight.FlighDateAndTime = flight.FlighDateAndTime
-		dtoFlight.StartingPoint = flight.StartingPoint
-		dtoFlight.Destination = flight.Destination
-		dtoFlight.Price = flight.Price
-		dtoFlight.Seats = flight.Seats
-		dtoFlight.RemainingSeats = flight.RemainingSeats
-
-		result = append(result, dtoFlight)
-	}
-
-	return result
+	return flights, err
 }
