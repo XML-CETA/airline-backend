@@ -52,11 +52,18 @@ func (handler *FlightHandler) GetOne(writer http.ResponseWriter, req *http.Reque
 }
 
 func (handler *FlightHandler) UpdateFlight(writer http.ResponseWriter, req *http.Request) {
-	var flight dtos.FlightDto
-	err := json.NewDecoder(req.Body).Decode(&flight)
+	var dto dtos.FlightDto
+	err := json.NewDecoder(req.Body).Decode(&dto)
 
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	flight, err := dto.Repackage()
+
+	if err != nil {
+		writer.WriteHeader(http.StatusExpectationFailed)
 		return
 	}
 

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"github.com/golang-jwt/jwt/v5"
 	"main/dtos"
 	"main/service"
 	"main/utils"
@@ -10,6 +9,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type AuthHandler struct {
@@ -58,6 +59,15 @@ func (handler *AuthHandler) Authorize(protectedEndpoint http.HandlerFunc, expect
 		protectedEndpoint(writer, request)
 
 	})
+}
+
+func (handler *AuthHandler) GetUsername(writer http.ResponseWriter, request *http.Request) string {
+
+	authorizationHeader := request.Header.Get("Authorization")
+	_, claims := handler.ParseJwt(authorizationHeader)
+	username := claims.CustomClaims["username"]
+	return username
+
 }
 
 func (handler *AuthHandler) ParseJwt(authorizationHeader string) (*jwt.Token, *utils.Claims) {

@@ -2,6 +2,7 @@ package service
 
 import (
 	//"errors"
+
 	"main/dtos"
 	"main/model"
 	"main/repo"
@@ -14,6 +15,7 @@ type FlightService struct {
 }
 
 func (service *FlightService) Create(flight *model.Flight) error {
+	flight.RemainingSeats = flight.Seats
 	return service.Repo.Create(flight)
 }
 
@@ -25,7 +27,7 @@ func (service *FlightService) Delete(id primitive.ObjectID) error {
 	return service.Repo.Delete(id)
 }
 
-func (service *FlightService) Update(flight *dtos.FlightDto) error {
+func (service *FlightService) Update(flight *model.Flight) error {
 	return service.Repo.Update(flight)
 }
 

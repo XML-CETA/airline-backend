@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+
 	"main/dtos"
 	"main/model"
 	"main/utils"
@@ -18,7 +19,6 @@ func (repo *FlightRepository) Create(flight *model.Flight) error {
 	client, cancel := utils.GetConn()
 	defer cancel()
 
-	flight.RemainingSeats = flight.Seats
 	coll := client.Database("airline").Collection("flights")
 	_, err := coll.InsertOne(context.TODO(), flight)
 
@@ -55,20 +55,14 @@ func (repo *FlightRepository) Delete(id primitive.ObjectID) error {
 	return err
 }
 
-func (repo *FlightRepository) Update(flightAlter *dtos.FlightDto) error {
+func (repo *FlightRepository) Update(flight *model.Flight) error {
 	client, cancel := utils.GetConn()
 	defer cancel()
 
-	idO, _ := primitive.ObjectIDFromHex(flightAlter.Id)
-
-	filter := bson.M{"_id": idO}
-
-	update := bson.M{"$set": bson.M{"flighdateandtime": flightAlter.FlighDateAndTime, "startingpoint": flightAlter.StartingPoint,
-		"destination": flightAlter.Destination, "price": flightAlter.Price, "seats": flightAlter.Seats,
-		"remainingseats": flightAlter.RemainingSeats}}
+	filter := bson.D{{Key: "_id", Value: flight.Id}}
 
 	coll := client.Database("airline").Collection("flights")
-	_, err := coll.UpdateOne(context.TODO(), filter, update)
+	_, err := coll.UpdateOne(context.TODO(), filter, bson.D{{Key: "$set", Value: flight}})
 
 	return err
 }
