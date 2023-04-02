@@ -98,6 +98,30 @@ func (handler *FlightHandler) DeleteFlight(writer http.ResponseWriter, req *http
 	writer.Header().Set("Content-Type", "application/json")
 }
 
+func (handler *FlightHandler) SearchFlights(writer http.ResponseWriter, req *http.Request) {
+	var searchDto dtos.SearchDto
+	err := json.NewDecoder(req.Body).Decode(&searchDto)
+
+	var result []model.Flight
+	result, err = handler.Service.SearchFlights(searchDto)
+
+	if err != nil {
+		writer.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	if len(result) == 0 {
+		http.Error(writer, "There are no available flights at that time", http.StatusBadRequest)
+		return
+	}
+
+	flights := ConvertToSearchedFlightDto(result, searchDto.NeededSeats)
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(writer).Encode(flights)
+}
+
 func (handler *FlightHandler) GetAll(writer http.ResponseWriter, req *http.Request) {
 	var flights []dtos.FlightDto
 	var result []model.Flight
@@ -148,6 +172,25 @@ func ConvertToFlightDto(data []model.Flight) []dtos.FlightDto {
 		dtoFlight.RemainingSeats = flight.RemainingSeats
 
 		result = append(result, dtoFlight)
+	}
+
+	return result
+}
+
+func ConvertToSearchedFlightDto(data []model.Flight, neededSeats int) []dtos.SearchedFlightDto {
+	var result []dtos.SearchedFlightDto
+
+	for _, flight := range data {
+		var searchedFlightDto dtos.SearchedFlightDto
+		searchedFlightDto.Id = flight.Id.Hex()
+		searchedFlightDto.FlighDateAndTime = flight.FlighDateAndTime
+		searchedFlightDto.StartingPoint = flight.StartingPoint
+		searchedFlightDto.Destination = flight.Destination
+		searchedFlightDto.Price = flight.Price
+		searchedFlightDto.TotalPrice = searchedFlightDto.Price * neededSeats
+		searchedFlightDto.NeededSeats = neededSeats
+
+		result = append(result, searchedFlightDto)
 	}
 
 	return result

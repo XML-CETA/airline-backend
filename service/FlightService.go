@@ -3,6 +3,7 @@ package service
 import (
 	//"errors"
 
+	"main/dtos"
 	"main/model"
 	"main/repo"
 
@@ -20,6 +21,10 @@ func (service *FlightService) Create(flight *model.Flight) error {
 
 func (service *FlightService) GetOne(id primitive.ObjectID) (model.Flight, error) {
 	return service.Repo.GetOne(id)
+}
+
+func (service *FlightService) SearchFlights(searchDto dtos.SearchDto) ([]model.Flight, error) {
+	return service.Repo.SearchFlights(searchDto)
 }
 
 func (service *FlightService) Delete(id primitive.ObjectID) error {

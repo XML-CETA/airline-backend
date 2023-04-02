@@ -2,13 +2,13 @@ package repo
 
 import (
 	"context"
-
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"main/dtos"
 	"main/model"
 	"main/utils"
 	"time"
-
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type FlightRepository struct {
@@ -35,6 +35,25 @@ func (repo *FlightRepository) GetOne(id primitive.ObjectID) (model.Flight, error
 	err := coll.FindOne(context.TODO(), filter).Decode(&result)
 
 	return result, err
+}
+
+func (repo *FlightRepository) SearchFlights(searchDto dtos.SearchDto) ([]model.Flight, error) {
+	client, cancel := utils.GetConn()
+	defer cancel()
+
+	coll := client.Database("airline").Collection("flights")
+
+	filter := createFilter(searchDto)
+
+	cursor, err := coll.Find(context.TODO(), filter)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(context.TODO())
+
+	flights, err := searchByFilter(cursor, searchDto)
+
+	return flights, err
 }
 
 func (repo *FlightRepository) Delete(id primitive.ObjectID) error {
@@ -101,6 +120,41 @@ func (repo *FlightRepository) GetAllUpcoming() ([]model.Flight, error) {
 			flights = append(flights, flight)
 		}
 	}
-
 	return flights, err
+
 }
+
+func searchByFilter(cursor *mongo.Cursor, searchDto dtos.SearchDto) ([]model.Flight, error) {
+
+	var flights []model.Flight
+	for cursor.Next(context.TODO()) {
+		var flight model.Flight
+		err := cursor.Decode(&flight)
+
+		if err != nil {
+			return nil, err
+		}
+		if flight.RemainingSeats >= searchDto.NeededSeats {
+			flights = append(flights, flight)
+		}
+	}
+
+	return flights, nil
+}
+
+func createFilter(searchDto dtos.SearchDto) bson.D {
+	startOfDay := time.Date(searchDto.FlighDateAndTime.Year(), searchDto.FlighDateAndTime.Month(), searchDto.FlighDateAndTime.Day(), 0, 0, 0, 0, searchDto.FlighDateAndTime.Location())
+	endOfDay := startOfDay.AddDate(0, 0, 1)
+	filter := bson.D{
+		{Key: "destination", Value: searchDto.Destination},
+		{Key: "flighdateandtime", Value: bson.M{
+			"$gte": startOfDay,
+			"$lt":  endOfDay,
+		}},
+		{Key: "startingpoint", Value: searchDto.StartingPoint},
+	}
+	return filter
+}
+
+
+
