@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"main/auth/handler"
 	"main/model"
 	"main/service"
 	"net/http"
@@ -13,7 +12,7 @@ import (
 
 type TicketHandler struct {
 	Service *service.TicketService
-	Auth    *handler.AuthHandler
+	Auth    *AuthHandler
 }
 
 func (handler *TicketHandler) CreateTicket(writer http.ResponseWriter, req *http.Request) {

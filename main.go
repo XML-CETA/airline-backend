@@ -42,7 +42,6 @@ func startServer(userHandler *handler.UserHandler, authHandler *handler.AuthHand
 	router.HandleFunc("/tickets", ticketHandler.CreateTicket).Methods("POST")
 	router.HandleFunc("/tickets/{id}", ticketHandler.GetOne).Methods("GET")
 	router.HandleFunc("/tickets", ticketHandler.GetAll).Methods("GET")
-	// router.HandleFunc("/tickets", authHandler.GetUsername(ticketHandler.GetAll)).Methods("GET")
 
 	println("Server starting")
 	log.Fatal(http.ListenAndServe(":3000", cors.Handler(router)))
