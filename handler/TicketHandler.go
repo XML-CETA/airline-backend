@@ -2,7 +2,7 @@ package handler
 
 import (
 	"encoding/json"
-	"main/model"
+	"main/dtos"
 	"main/service"
 	"net/http"
 
@@ -16,8 +16,10 @@ type TicketHandler struct {
 }
 
 func (handler *TicketHandler) CreateTicket(writer http.ResponseWriter, req *http.Request) {
-	var ticket model.Ticket
-	err := json.NewDecoder(req.Body).Decode(&ticket)
+	var ticketDto dtos.CreateTicketDto
+	err := json.NewDecoder(req.Body).Decode(&ticketDto)
+	ticket := ticketDto.Repackage()
+	ticket.User = handler.Auth.GetUsername(writer, req)
 
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
