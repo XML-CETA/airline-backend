@@ -1,26 +1,21 @@
 package main
 
 import (
-	"log"
-	"main/auth/generator"
-	authHandler "main/auth/handler"
-	authService "main/auth/service"
-
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
-
+	"log"
 	"main/handler"
 	"main/repo"
 	"main/service"
 	"net/http"
 )
 
-func startServer(userHandler *handler.UserHandler, authHandler *authHandler.AuthHandler,
+func startServer(userHandler *handler.UserHandler, authHandler *handler.AuthHandler,
 	flightHandler *handler.FlightHandler) {
 	router := mux.NewRouter().StrictSlash(true)
 
-	c := cors.New(cors.Options{
+	cors := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:4200"},
 		AllowCredentials: true,
 		AllowedMethods: []string{
@@ -44,7 +39,7 @@ func startServer(userHandler *handler.UserHandler, authHandler *authHandler.Auth
 	router.HandleFunc("/flights/{id}", flightHandler.DeleteFlight).Methods("DELETE")
 
 	println("Server starting")
-	log.Fatal(http.ListenAndServe(":3000", c.Handler(router)))
+	log.Fatal(http.ListenAndServe(":3000", cors.Handler(router)))
 }
 
 func main() {
@@ -54,11 +49,10 @@ func main() {
 	}
 
 	userRepository := &repo.UserRepository{}
-	jwtGenerator := &generator.JwtGenerator{}
 	userService := &service.UserService{Repo: userRepository}
-	authService := &authService.AuthService{Repo: userRepository, JwtGenerator: jwtGenerator}
+	authService := &service.AuthService{Repo: userRepository}
 	userHandler := &handler.UserHandler{Service: userService}
-	authHandler := &authHandler.AuthHandler{AuthService: authService}
+	authHandler := &handler.AuthHandler{AuthService: authService}
 	flightRepository := &repo.FlightRepository{}
 	flightService := &service.FlightService{Repo: flightRepository}
 	flightHandler := &handler.FlightHandler{Service: flightService}
