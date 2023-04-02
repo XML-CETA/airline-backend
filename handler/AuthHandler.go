@@ -3,9 +3,9 @@ package handler
 import (
 	"encoding/json"
 	"github.com/golang-jwt/jwt/v5"
-	"main/auth/dto"
-	"main/auth/generator"
-	"main/auth/service"
+	"main/dtos"
+	"main/service"
+	"main/utils"
 	"net/http"
 	"os"
 	"strings"
@@ -17,7 +17,7 @@ type AuthHandler struct {
 }
 
 func (handler *AuthHandler) Login(writer http.ResponseWriter, req *http.Request) {
-	var loginDto dto.LoginDto
+	var loginDto dtos.LoginDto
 	err := json.NewDecoder(req.Body).Decode(&loginDto)
 
 	if err != nil {
@@ -47,7 +47,7 @@ func (handler *AuthHandler) Authorize(protectedEndpoint http.HandlerFunc, expect
 		}
 		token, claims := handler.ParseJwt(authorizationHeader)
 		if !token.Valid {
-			http.Error(writer, "Token is not valid anymore", http.StatusUnauthorized)
+			http.Error(writer, "Token is not valid", http.StatusUnauthorized)
 			return
 		}
 
@@ -60,13 +60,13 @@ func (handler *AuthHandler) Authorize(protectedEndpoint http.HandlerFunc, expect
 	})
 }
 
-func (handler *AuthHandler) ParseJwt(authorizationHeader string) (*jwt.Token, *generator.Claims) {
+func (handler *AuthHandler) ParseJwt(authorizationHeader string) (*jwt.Token, *utils.Claims) {
 	tokenString := strings.TrimSpace(strings.Split(authorizationHeader, "Bearer")[1])
-	token, _ := jwt.ParseWithClaims(tokenString, &generator.Claims{}, func(token *jwt.Token) (interface{}, error) {
+	token, _ := jwt.ParseWithClaims(tokenString, &utils.Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(os.Getenv("SECRET_KEY")), nil
 	}, jwt.WithLeeway(5*time.Second))
 
-	claims, _ := token.Claims.(*generator.Claims)
+	claims, _ := token.Claims.(*utils.Claims)
 
 	return token, claims
 }
