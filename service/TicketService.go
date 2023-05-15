@@ -84,3 +84,7 @@ func (service *TicketService) GetAll(username string) ([]dtos.TicketDto, error) 
 
 	return ticketList, err
 }
+
+func (service *TicketService) DeleteByFlight(flight primitive.ObjectID) error {
+	return service.Repo.DeleteByFlight(flight);
+}

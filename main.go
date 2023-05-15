@@ -61,9 +61,9 @@ func main() {
 	authHandler := &handler.AuthHandler{AuthService: authService}
 	flightRepository := &repo.FlightRepository{}
 	flightService := &service.FlightService{Repo: flightRepository}
-	flightHandler := &handler.FlightHandler{Service: flightService}
 	ticketRepository := &repo.TicketRepository{}
 	ticketService := &service.TicketService{Repo: ticketRepository, FlightRepo: flightRepository, UserRepo: userRepository}
 	ticketHandler := &handler.TicketHandler{Service: ticketService, Auth: authHandler}
+	flightHandler := &handler.FlightHandler{Service: flightService, TicketService: ticketService}
 	startServer(userHandler, authHandler, flightHandler, ticketHandler)
 }

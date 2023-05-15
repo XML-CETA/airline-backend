@@ -13,6 +13,7 @@ import (
 
 type FlightHandler struct {
 	Service *service.FlightService
+	TicketService *service.TicketService
 }
 
 func (handler *FlightHandler) CreateFlight(writer http.ResponseWriter, req *http.Request) {
@@ -88,6 +89,13 @@ func (handler *FlightHandler) DeleteFlight(writer http.ResponseWriter, req *http
 	}
 
 	err = handler.Service.Delete(idO)
+
+	if err != nil {
+		writer.WriteHeader(http.StatusExpectationFailed)
+		return
+	}
+
+	err = handler.TicketService.DeleteByFlight(idO);
 
 	if err != nil {
 		writer.WriteHeader(http.StatusExpectationFailed)

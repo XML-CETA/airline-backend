@@ -57,3 +57,15 @@ func (repo *TicketRepository) GetAll(username string) ([]model.Ticket, error) {
 
 	return result, err
 }
+
+func (repo *TicketRepository) DeleteByFlight(flight primitive.ObjectID) error {
+	client, cancel := utils.GetConn()
+	defer cancel()
+
+	coll := client.Database("airline").Collection("tickets")
+	filter := bson.D{{Key: "flightid", Value: flight}}
+
+	_ , err := coll.DeleteMany(context.Background(), filter)
+
+	return err
+}

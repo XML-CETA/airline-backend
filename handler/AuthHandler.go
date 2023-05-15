@@ -62,7 +62,6 @@ func (handler *AuthHandler) Authorize(protectedEndpoint http.HandlerFunc, expect
 }
 
 func (handler *AuthHandler) GetUsername(writer http.ResponseWriter, request *http.Request) string {
-
 	authorizationHeader := request.Header.Get("Authorization")
 	_, claims := handler.ParseJwt(authorizationHeader)
 	username := claims.CustomClaims["username"]
