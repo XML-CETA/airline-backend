@@ -9,6 +9,7 @@ import (
 type CreateTicketDto struct {
 	FlightId primitive.ObjectID `json:"flightId"`
 	Amount   int                `json:"amount"`
+	ApiKey   string             `json:"apiKey,omitempty"`
 }
 
 func (ticketDto *CreateTicketDto) Repackage() model.Ticket {

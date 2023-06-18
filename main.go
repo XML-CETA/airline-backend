@@ -13,7 +13,7 @@ import (
 )
 
 func startServer(userHandler *handler.UserHandler, authHandler *handler.AuthHandler,
-	flightHandler *handler.FlightHandler, ticketHandler *handler.TicketHandler) {
+	flightHandler *handler.FlightHandler, ticketHandler *handler.TicketHandler, apiKeyHandler *handler.ApiKeyHandler) {
 
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -31,7 +31,7 @@ func startServer(userHandler *handler.UserHandler, authHandler *handler.AuthHand
 		},
 	})
 	router.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
-	router.HandleFunc("/users/{username}", authHandler.Authorize(userHandler.GetOne, "Admin")).Methods("GET")
+	router.HandleFunc("/users/{username}", authHandler.Authorize(userHandler.GetOne, "Regular")).Methods("GET")
 	router.HandleFunc("/login", authHandler.Login).Methods("POST")
 	router.HandleFunc("/flights", flightHandler.CreateFlight).Methods("POST")
 	router.HandleFunc("/flights", flightHandler.GetAll).Methods("GET")
@@ -43,6 +43,7 @@ func startServer(userHandler *handler.UserHandler, authHandler *handler.AuthHand
 	router.HandleFunc("/tickets/{id}", ticketHandler.GetOne).Methods("GET")
 	router.HandleFunc("/tickets", ticketHandler.GetAll).Methods("GET")
 	router.HandleFunc("/flights/search", flightHandler.SearchFlights).Methods("POST")
+	router.HandleFunc("/apiKey", authHandler.Authorize(apiKeyHandler.GenerateApiKey, "Regular")).Methods("POST")
 
 	println("Server starting")
 	log.Fatal(http.ListenAndServe(":3000", cors.Handler(router)))
@@ -65,5 +66,7 @@ func main() {
 	ticketRepository := &repo.TicketRepository{}
 	ticketService := &service.TicketService{Repo: ticketRepository, FlightRepo: flightRepository, UserRepo: userRepository}
 	ticketHandler := &handler.TicketHandler{Service: ticketService, Auth: authHandler}
-	startServer(userHandler, authHandler, flightHandler, ticketHandler)
+	apiKeyService := &service.ApiKeyService{}
+	apiKeyHandler := &handler.ApiKeyHandler{Service: apiKeyService, Auth: authHandler}
+	startServer(userHandler, authHandler, flightHandler, ticketHandler, apiKeyHandler)
 }

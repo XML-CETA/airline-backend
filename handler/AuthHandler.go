@@ -40,7 +40,6 @@ func (handler *AuthHandler) Login(writer http.ResponseWriter, req *http.Request)
 
 func (handler *AuthHandler) Authorize(protectedEndpoint http.HandlerFunc, expectedRole string) http.HandlerFunc {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-
 		authorizationHeader := request.Header.Get("Authorization")
 		if authorizationHeader == "" {
 			http.Error(writer, "You are unauthorized", http.StatusUnauthorized)
@@ -61,13 +60,13 @@ func (handler *AuthHandler) Authorize(protectedEndpoint http.HandlerFunc, expect
 	})
 }
 
-func (handler *AuthHandler) GetUsername(writer http.ResponseWriter, request *http.Request) string {
+func (handler *AuthHandler) GetUsername(writer http.ResponseWriter, request *http.Request) (string, string) {
 
 	authorizationHeader := request.Header.Get("Authorization")
 	_, claims := handler.ParseJwt(authorizationHeader)
 	username := claims.CustomClaims["username"]
-	return username
-
+	role := claims.CustomClaims["role"]
+	return username, role
 }
 
 func (handler *AuthHandler) ParseJwt(authorizationHeader string) (*jwt.Token, *utils.Claims) {
