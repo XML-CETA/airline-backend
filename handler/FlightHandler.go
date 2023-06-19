@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"main/dtos"
 	"main/model"
 	"main/service"
@@ -156,6 +157,22 @@ func (handler *FlightHandler) GetAllUpcoming(writer http.ResponseWriter, req *ht
 	writer.WriteHeader(http.StatusOK)
 
 	json.NewEncoder(writer).Encode(flights)
+}
+
+func (handler *FlightHandler) GetFlightForCitiesAndDate(writer http.ResponseWriter, req *http.Request) {
+	var searchFlight dtos.CitiesAndDateFlightDto
+	err := json.NewDecoder(req.Body).Decode(&searchFlight)
+
+	fmt.Println(searchFlight.Date)
+	fmt.Println(searchFlight.StartingPoint)
+	fmt.Println(searchFlight.Destination)
+
+	if err != nil {
+		writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(writer).Encode(searchFlight)
 }
 
 func ConvertToFlightDto(data []model.Flight) []dtos.FlightDto {
