@@ -2,12 +2,11 @@ package handler
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"main/dtos"
 	"main/service"
 	"net/http"
-
-	"github.com/gorilla/mux"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TicketHandler struct {
@@ -18,9 +17,9 @@ type TicketHandler struct {
 func (handler *TicketHandler) CreateTicket(writer http.ResponseWriter, req *http.Request) {
 	var ticketDto dtos.CreateTicketDto
 	err := json.NewDecoder(req.Body).Decode(&ticketDto)
+	user, _ := handler.Auth.GetUsername(writer, req)
 	ticket := ticketDto.Repackage()
-	ticket.User = handler.Auth.GetUsername(writer, req)
-
+	ticket.User = user
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
 		return
@@ -55,7 +54,7 @@ func (handler *TicketHandler) GetOne(writer http.ResponseWriter, req *http.Reque
 
 func (handler *TicketHandler) GetAll(writer http.ResponseWriter, req *http.Request) {
 
-	username := handler.Auth.GetUsername(writer, req)
+	username, _ := handler.Auth.GetUsername(writer, req)
 
 	tickets, err := handler.Service.GetAll(username)
 

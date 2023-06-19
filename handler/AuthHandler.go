@@ -38,22 +38,31 @@ func (handler *AuthHandler) Login(writer http.ResponseWriter, req *http.Request)
 	json.NewEncoder(writer).Encode(token)
 }
 
-func (handler *AuthHandler) Authorize(protectedEndpoint http.HandlerFunc, expectedRole string) http.HandlerFunc {
+func (handler *AuthHandler) Authorize(protectedEndpoint http.HandlerFunc, expectedRole string, expectedGoal string) http.HandlerFunc {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		apiKeyHeader := request.Header.Get("ApiKey")
+		if apiKeyHeader == "" {
+			authorizationHeader := request.Header.Get("Authorization")
+			if authorizationHeader == "" {
+				http.Error(writer, "You are unauthorized", http.StatusUnauthorized)
+				return
+			}
+			token, claims := handler.ParseJwt(authorizationHeader)
+			if !token.Valid {
+				http.Error(writer, "Token is not valid", http.StatusUnauthorized)
+				return
+			}
 
-		authorizationHeader := request.Header.Get("Authorization")
-		if authorizationHeader == "" {
-			http.Error(writer, "You are unauthorized", http.StatusUnauthorized)
+			if claims.CustomClaims["role"] != expectedRole {
+				http.Error(writer, "You are not authorized for this endpoint", http.StatusForbidden)
+				return
+			}
+			protectedEndpoint(writer, request)
 			return
 		}
-		token, claims := handler.ParseJwt(authorizationHeader)
-		if !token.Valid {
-			http.Error(writer, "Token is not valid", http.StatusUnauthorized)
-			return
-		}
-
-		if claims.CustomClaims["role"] != expectedRole {
-			http.Error(writer, "You are not authorized for this endpoint", http.StatusForbidden)
+		_, claims := handler.ParseApiKey(apiKeyHeader)
+		if claims.CustomClaims["goal"] != expectedGoal {
+			http.Error(writer, "Api key is only for buying tickets", http.StatusUnauthorized)
 			return
 		}
 		protectedEndpoint(writer, request)
@@ -61,13 +70,19 @@ func (handler *AuthHandler) Authorize(protectedEndpoint http.HandlerFunc, expect
 	})
 }
 
-func (handler *AuthHandler) GetUsername(writer http.ResponseWriter, request *http.Request) string {
+func (handler *AuthHandler) GetUsername(writer http.ResponseWriter, request *http.Request) (string, string) {
 
 	authorizationHeader := request.Header.Get("Authorization")
-	_, claims := handler.ParseJwt(authorizationHeader)
+	var claims *utils.Claims
+	apiKeyHeader := request.Header.Get("ApiKey")
+	if apiKeyHeader != "" {
+		_, claims = handler.ParseApiKey(apiKeyHeader)
+	} else {
+		_, claims = handler.ParseJwt(authorizationHeader)
+	}
 	username := claims.CustomClaims["username"]
-	return username
-
+	role := claims.CustomClaims["role"]
+	return username, role
 }
 
 func (handler *AuthHandler) ParseJwt(authorizationHeader string) (*jwt.Token, *utils.Claims) {
@@ -79,4 +94,14 @@ func (handler *AuthHandler) ParseJwt(authorizationHeader string) (*jwt.Token, *u
 	claims, _ := token.Claims.(*utils.Claims)
 
 	return token, claims
+}
+
+func (handler *AuthHandler) ParseApiKey(apiKeyHeader string) (*jwt.Token, *utils.Claims) {
+	apiKey, _ := jwt.ParseWithClaims(apiKeyHeader, &utils.Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("SECRET_KEY")), nil
+	}, jwt.WithLeeway(5*time.Second))
+
+	claims, _ := apiKey.Claims.(*utils.Claims)
+
+	return apiKey, claims
 }
