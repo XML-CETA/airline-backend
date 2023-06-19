@@ -18,7 +18,8 @@ func startServer(userHandler *handler.UserHandler, authHandler *handler.AuthHand
 	router := mux.NewRouter().StrictSlash(true)
 
 	cors := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:4200"},
+		// AllowedOrigins:   []string{"http://localhost:4200", "http://localhost:8000"},
+		AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,
 		AllowedMethods: []string{
 			http.MethodGet,
@@ -43,7 +44,7 @@ func startServer(userHandler *handler.UserHandler, authHandler *handler.AuthHand
 	router.HandleFunc("/tickets/{id}", ticketHandler.GetOne).Methods("GET")
 	router.HandleFunc("/tickets", ticketHandler.GetAll).Methods("GET")
 	router.HandleFunc("/flights/search", flightHandler.SearchFlights).Methods("POST")
-	router.HandleFunc("/flights/reservation", flightHandler.GetFlightForCitiesAndDate).Methods("POST")
+	router.HandleFunc("/flights/reservation", flightHandler.GetFlightForCitiesAndDate).Methods("GET")
 
 	println("Server starting")
 	log.Fatal(http.ListenAndServe(":3000", cors.Handler(router)))

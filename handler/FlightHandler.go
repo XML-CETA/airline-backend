@@ -160,19 +160,21 @@ func (handler *FlightHandler) GetAllUpcoming(writer http.ResponseWriter, req *ht
 }
 
 func (handler *FlightHandler) GetFlightForCitiesAndDate(writer http.ResponseWriter, req *http.Request) {
-	var searchFlight dtos.CitiesAndDateFlightDto
-	err := json.NewDecoder(req.Body).Decode(&searchFlight)
+	fmt.Println("POGODIO GRPC F-JU")
+	return
+	// var searchFlight dtos.CitiesAndDateFlightDto
+	// err := json.NewDecoder(req.Body).Decode(&searchFlight)
 
-	fmt.Println(searchFlight.Date)
-	fmt.Println(searchFlight.StartingPoint)
-	fmt.Println(searchFlight.Destination)
+	// fmt.Println(searchFlight.Date)
+	// fmt.Println(searchFlight.StartingPoint)
+	// fmt.Println(searchFlight.Destination)
 
-	if err != nil {
-		writer.WriteHeader(http.StatusBadRequest)
-		return
-	}
+	// if err != nil {
+	// 	writer.WriteHeader(http.StatusBadRequest)
+	// 	return
+	// }
 
-	json.NewEncoder(writer).Encode(searchFlight)
+	// json.NewEncoder(writer).Encode(searchFlight)
 }
 
 func ConvertToFlightDto(data []model.Flight) []dtos.FlightDto {
