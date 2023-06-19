@@ -18,8 +18,8 @@ func startServer(userHandler *handler.UserHandler, authHandler *handler.AuthHand
 	router := mux.NewRouter().StrictSlash(true)
 
 	cors := cors.New(cors.Options{
-		// AllowedOrigins:   []string{"http://localhost:4200", "http://localhost:8000"},
-		AllowedOrigins:   []string{"*"},
+		AllowedOrigins: []string{"http://localhost:4200"},
+		// AllowedOrigins:   []string{"*"},
 		AllowCredentials: true,
 		AllowedMethods: []string{
 			http.MethodGet,

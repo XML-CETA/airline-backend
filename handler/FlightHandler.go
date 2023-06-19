@@ -161,7 +161,7 @@ func (handler *FlightHandler) GetAllUpcoming(writer http.ResponseWriter, req *ht
 
 func (handler *FlightHandler) GetFlightForCitiesAndDate(writer http.ResponseWriter, req *http.Request) {
 	fmt.Println("POGODIO GRPC F-JU")
-	return
+	writer.WriteHeader(http.StatusOK)
 	// var searchFlight dtos.CitiesAndDateFlightDto
 	// err := json.NewDecoder(req.Body).Decode(&searchFlight)
 
