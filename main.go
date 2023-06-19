@@ -31,9 +31,9 @@ func startServer(userHandler *handler.UserHandler, authHandler *handler.AuthHand
 		},
 	})
 	router.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
-	router.HandleFunc("/users/{username}", authHandler.Authorize(userHandler.GetOne, "Regular")).Methods("GET")
+	router.HandleFunc("/users/{username}", authHandler.Authorize(userHandler.GetOne, "Regular", "")).Methods("GET")
 	router.HandleFunc("/login", authHandler.Login).Methods("POST")
-	router.HandleFunc("/flights", flightHandler.CreateFlight).Methods("POST")
+	router.HandleFunc("/flights", authHandler.Authorize(flightHandler.CreateFlight, "Regular", "buyingTickets")).Methods("POST")
 	router.HandleFunc("/flights", flightHandler.GetAll).Methods("GET")
 	router.HandleFunc("/flights/upcoming", flightHandler.GetAllUpcoming).Methods("GET")
 	router.HandleFunc("/flights/{id}", flightHandler.GetOne).Methods("GET")
@@ -41,9 +41,9 @@ func startServer(userHandler *handler.UserHandler, authHandler *handler.AuthHand
 	router.HandleFunc("/flights/{id}", flightHandler.DeleteFlight).Methods("DELETE")
 	router.HandleFunc("/tickets", ticketHandler.CreateTicket).Methods("POST")
 	router.HandleFunc("/tickets/{id}", ticketHandler.GetOne).Methods("GET")
-	router.HandleFunc("/tickets", ticketHandler.GetAll).Methods("GET")
+	router.HandleFunc("/tickets", authHandler.Authorize(ticketHandler.GetAll, "Regular", "")).Methods("GET")
 	router.HandleFunc("/flights/search", flightHandler.SearchFlights).Methods("POST")
-	router.HandleFunc("/apiKey", authHandler.Authorize(apiKeyHandler.GenerateApiKey, "Regular")).Methods("POST")
+	router.HandleFunc("/apiKey", authHandler.Authorize(apiKeyHandler.GenerateApiKey, "Regular", "")).Methods("POST")
 
 	println("Server starting")
 	log.Fatal(http.ListenAndServe(":3000", cors.Handler(router)))
